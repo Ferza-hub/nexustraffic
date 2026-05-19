@@ -1,7 +1,7 @@
 {
-  "name": "trafficpeak-personal",
+  "name": "nexus",
   "version": "1.0.0",
-  "description": "Personal website traffic generator with residential proxies",
+  "description": "Personal website",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
