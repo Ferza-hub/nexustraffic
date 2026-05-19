@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NexusTraffic — Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;600;700;800;900&family=Epilogue:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#07090f;--s1:#0d1117;--s2:#161b22;--s3:#1f2937;
+  --border:rgba(56,189,248,0.08);--border2:rgba(56,189,248,0.05);
+  --accent:#38bdf8;--accent-g:rgba(56,189,248,0.15);
+  --green:#22c55e;--green-g:rgba(34,197,94,0.12);
+  --amber:#f59e0b;--red:#ef4444;--purple:#a78bfa;
+  --text:#e2e8f0;--muted:#64748b;--muted2:#94a3b8;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Epilogue',sans-serif;font-size:14px;line-height:1.5;overflow-x:hidden}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--s1)}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:2px}
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(56,189,248,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(56,189,248,0.02) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:999}
+.login-box{background:var(--s1);border:1px solid var(--border);border-radius:20px;padding:2.5rem;width:360px;text-align:center}
+.login-logo{font-family:'Cabinet Grotesk',sans-serif;font-weight:900;font-size:1.8rem;letter-spacing:-1px;margin-bottom:0.5rem}
+.login-sub{color:var(--muted);font-size:0.85rem;margin-bottom:2rem}
+
+/* HEADER */
+header{position:fixed;top:0;left:0;right:0;z-index:200;height:54px;background:rgba(7,9,15,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 1.25rem;gap:1rem}
+.logo{font-family:'Cabinet Grotesk',sans-serif;font-weight:900;font-size:1.1rem;letter-spacing:-0.5px;display:flex;align-items:center;gap:0.5rem}
+.logo-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 8px var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.4)}}
+.nav-pills{display:flex;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:3px;gap:2px;margin:0 auto}
+.nav-pill{padding:.3rem .9rem;border-radius:7px;font-size:.78rem;font-weight:700;color:var(--muted);cursor:pointer;transition:all .15s;font-family:'Cabinet Grotesk',sans-serif;white-space:nowrap}
+.nav-pill:hover{color:var(--text)}
+.nav-pill.active{background:var(--accent);color:#07090f}
+.hdr-right{display:flex;align-items:center;gap:.6rem;margin-left:auto}
+.online-badge{display:flex;align-items:center;gap:.35rem;background:var(--green-g);border:1px solid rgba(34,197,94,.25);border-radius:20px;padding:.2rem .65rem;font-size:.72rem;font-weight:700;color:var(--green)}
+.online-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1.5s infinite}
+
+/* LAYOUT */
+.layout{display:flex;padding-top:54px;min-height:100vh;position:relative;z-index:1}
+main{flex:1;padding:1.5rem;max-width:1400px;margin:0 auto;width:100%}
+.page{display:none}
+.page.active{display:block;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.page-title{font-family:'Cabinet Grotesk',sans-serif;font-size:1.35rem;font-weight:900;letter-spacing:-.3px;margin-bottom:.2rem}
+.page-sub{color:var(--muted2);font-size:.82rem;margin-bottom:1.5rem}
+
+/* CARDS */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:1.25rem}
+.card-title{font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:.88rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between}
+
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.25rem}
+.stat-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:1rem 1.25rem;animation:slideUp .4s ease both}
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.stat-card:nth-child(1){animation-delay:.05s}.stat-card:nth-child(2){animation-delay:.1s}.stat-card:nth-child(3){animation-delay:.15s}.stat-card:nth-child(4){animation-delay:.2s}
+.stat-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.65rem}
+.stat-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.95rem}
+.stat-change{font-size:.7rem;font-weight:700;padding:.15rem .45rem;border-radius:20px}
+.up{background:rgba(34,197,94,.12);color:var(--green)}
+.down{background:rgba(239,68,68,.1);color:var(--red)}
+.stat-val{font-family:'Cabinet Grotesk',sans-serif;font-size:1.6rem;font-weight:900;letter-spacing:-1px;line-height:1;margin-bottom:.2rem}
+.stat-lbl{font-size:.72rem;color:var(--muted)}
+
+/* GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1.25rem}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;padding:.55rem 1.1rem;border-radius:9px;font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .15s;border:none}
+.btn-primary{background:var(--accent);color:#07090f;box-shadow:0 0 18px rgba(56,189,248,.2)}
+.btn-primary:hover{background:#7dd3fc;transform:translateY(-1px)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-secondary{background:var(--s3);color:var(--muted2);border:1px solid var(--border)}
+.btn-secondary:hover{color:var(--text)}
+.btn-danger{background:rgba(239,68,68,.1);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.btn-danger:hover{background:rgba(239,68,68,.2)}
+.btn-success{background:var(--green-g);color:var(--green);border:1px solid rgba(34,197,94,.25)}
+.btn-sm{padding:.3rem .65rem;font-size:.72rem;border-radius:7px}
+.btn-full{width:100%}
+
+/* FORM */
+.form-group{display:flex;flex-direction:column;gap:.3rem;margin-bottom:.85rem}
+.form-label{font-size:.7rem;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;font-family:'Cabinet Grotesk',sans-serif}
+.form-input,.form-select,.form-textarea{background:var(--s2);border:1px solid var(--border);border-radius:9px;color:var(--text);padding:.55rem .8rem;font-family:'Epilogue',sans-serif;font-size:.85rem;outline:none;transition:border-color .15s,box-shadow .15s;width:100%;appearance:none}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(56,189,248,.08)}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--muted)}
+.form-textarea{resize:vertical;min-height:70px}
+.sel-wrap{position:relative}.sel-wrap::after{content:'▾';position:absolute;right:.8rem;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none;font-size:.75rem}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem}
+.form-hint{font-size:.7rem;color:var(--muted);margin-top:.2rem}
+
+/* TOGGLE */
+.toggle{width:34px;height:18px;border-radius:9px;background:var(--s3);border:1px solid var(--border);cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.toggle::after{content:'';width:12px;height:12px;border-radius:6px;background:var(--muted);position:absolute;top:2px;left:2px;transition:all .2s}
+.toggle.on{background:var(--green);border-color:var(--green)}
+.toggle.on::after{transform:translateX(16px);background:#fff}
+
+/* TAGS */
+.tag{display:inline-block;padding:.15rem .5rem;border-radius:5px;font-size:.68rem;font-weight:700;font-family:'Cabinet Grotesk',sans-serif}
+.tag-blue{background:rgba(56,189,248,.12);color:var(--accent)}
+.tag-green{background:rgba(34,197,94,.12);color:var(--green)}
+.tag-amber{background:rgba(245,158,11,.12);color:var(--amber)}
+.tag-red{background:rgba(239,68,68,.1);color:var(--red)}
+.tag-purple{background:rgba(167,139,250,.12);color:var(--purple)}
+
+/* PROGRESS */
+.progress-bar{height:5px;background:var(--s3);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--purple));transition:width .3s}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:.5rem .75rem;border-bottom:1px solid var(--border)}
+td{padding:.7rem .75rem;font-size:.82rem;border-bottom:1px solid var(--border2);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(56,189,248,.02)}
+
+/* CAMPAIGN CARD */
+.campaign-card{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:.65rem;transition:border-color .15s}
+.campaign-card:hover{border-color:rgba(56,189,248,.2)}
+.cc-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.75rem}
+.cc-title{font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:.9rem;margin-bottom:.15rem}
+.cc-url{font-size:.72rem;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:280px}
+.cc-meta{display:flex;gap:.75rem;margin-bottom:.65rem;flex-wrap:wrap}
+.cc-meta-item{font-size:.72rem;color:var(--muted)}
+.cc-meta-item span{color:var(--muted2);font-weight:600}
+.cc-footer{display:flex;align-items:center;gap:.5rem;margin-top:.75rem}
+.cc-progress-label{font-size:.72rem;color:var(--muted2);font-weight:700;margin-left:auto}
+
+/* PROXY CARD */
+.proxy-card{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:.9rem;transition:border-color .15s}
+.proxy-card:hover{border-color:rgba(56,189,248,.2)}
+.proxy-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.75rem;margin-bottom:1rem}
+
+/* LOG */
+.log-item{display:flex;gap:.65rem;align-items:flex-start;padding:.45rem 0;border-bottom:1px solid var(--border2);font-size:.78rem}
+.log-item:last-child{border-bottom:none}
+.log-time{color:var(--muted);white-space:nowrap;font-size:.68rem;width:65px;flex-shrink:0;font-family:'Cabinet Grotesk',sans-serif;font-weight:700;margin-top:1px}
+.log-dot{width:5px;height:5px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.log-msg{color:var(--muted2);line-height:1.4}
+.log-msg strong{color:var(--text);font-weight:600}
+
+/* TOAST */
+#toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:999;display:flex;flex-direction:column;gap:.5rem}
+.toast-item{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:.65rem 1rem;font-size:.8rem;font-weight:600;font-family:'Cabinet Grotesk',sans-serif;animation:slideIn .2s ease;display:flex;align-items:center;gap:.5rem;min-width:220px}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:translateX(0)}}
+.toast-success{border-color:rgba(34,197,94,.3);color:var(--green)}
+.toast-error{border-color:rgba(239,68,68,.3);color:var(--red)}
+.toast-info{border-color:rgba(56,189,248,.3);color:var(--accent)}
+
+/* CHART */
+.chart-bars{display:flex;align-items:flex-end;gap:4px;height:100px;padding:.5rem 0}
+.chart-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.chart-bar{width:100%;border-radius:4px 4px 0 0;min-height:3px;transition:opacity .15s;cursor:pointer}
+.chart-bar:hover{opacity:.75}
+.chart-lbl{font-size:.6rem;color:var(--muted);font-family:'Cabinet Grotesk',sans-serif;font-weight:600}
+
+/* LOADING */
+.spinner{width:16px;height:16px;border:2px solid rgba(56,189,248,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:900px){.stats-row{grid-template-columns:1fr 1fr}.grid-2,.grid-3{grid-template-columns:1fr}.form-row,.form-row-3{grid-template-columns:1fr}}
+@media(max-width:600px){.stats-row{grid-template-columns:1fr}.nav-pills{display:none}}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">⚡ NexusTraffic</div>
+    <div class="login-sub">Personal Traffic Generator Panel</div>
+    <div class="form-group" style="text-align:left">
+      <label class="form-label">Password</label>
+      <input type="password" class="form-input" id="login-pass" placeholder="Enter panel password" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn btn-primary btn-full" onclick="doLogin()" id="login-btn">Masuk →</button>
+    <div id="login-err" style="color:var(--red);font-size:.78rem;margin-top:.65rem;display:none">Password salah</div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo"><div class="logo-dot"></div>NexusTraffic</div>
+  <div class="nav-pills">
+    <div class="nav-pill active" onclick="showPage('dashboard',this)">Dashboard</div>
+    <div class="nav-pill" onclick="showPage('campaigns',this)">Campaigns</div>
+    <div class="nav-pill" onclick="showPage('proxies',this)">Proxies</div>
+    <div class="nav-pill" onclick="showPage('logs',this)">Logs</div>
+    <div class="nav-pill" onclick="showPage('settings',this)">Settings</div>
+  </div>
+  <div class="hdr-right">
+    <div class="online-badge" id="proxy-badge"><div class="online-dot"></div>— Proxies</div>
+    <button class="btn btn-secondary btn-sm" onclick="doLogout()">Logout</button>
+  </div>
+</header>
+
+<div class="layout">
+<main>
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="page-title">Dashboard</div>
+  <div class="page-sub" id="dash-sub">Memuat data...</div>
+
+  <div class="stats-row" id="stats-row">
+    <div class="stat-card"><div class="stat-top"><div class="stat-icon" style="background:rgba(56,189,248,.1)">📊</div><span class="stat-change up">—</span></div><div class="stat-val" id="s-campaigns">—</div><div class="stat-lbl">Total Campaigns</div></div>
+    <div class="stat-card"><div class="stat-top"><div class="stat-icon" style="background:rgba(34,197,94,.1)">🚀</div><span class="stat-change up" id="s-active-badge">—</span></div><div class="stat-val" id="s-active">—</div><div class="stat-lbl">Berjalan</div></div>
+    <div class="stat-card"><div class="stat-top"><div class="stat-icon" style="background:rgba(167,139,250,.1)">👁️</div><span class="stat-change up">Total</span></div><div class="stat-val" id="s-visits">—</div><div class="stat-lbl">Visits Terkirim</div></div>
+    <div class="stat-card"><div class="stat-top"><div class="stat-icon" style="background:rgba(245,158,11,.1)">⚡</div><span class="stat-change up" id="s-rate-badge">—</span></div><div class="stat-val" id="s-rate">—%</div><div class="stat-lbl">Success Rate</div></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">Visits 7 Hari Terakhir</div>
+      <div class="chart-bars" id="dash-chart"></div>
+      <div style="display:flex;justify-content:space-around" id="dash-chart-labels"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Recent Activity</div>
+      <div id="dash-log" style="max-height:200px;overflow-y:auto"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Campaign Aktif <span class="tag tag-blue" id="active-count">0</span></div>
+    <div id="active-campaigns-list"><div style="color:var(--muted);font-size:.82rem;padding:.5rem 0">Tidak ada campaign aktif.</div></div>
+  </div>
+</div>
+
+<!-- CAMPAIGNS -->
+<div class="page" id="page-campaigns">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem">
+    <div>
+      <div class="page-title">Campaigns</div>
+      <div class="page-sub">Kelola semua campaign traffic kamu</div>
+    </div>
+    <button class="btn btn-primary" onclick="showModal('modal-new-campaign')">+ Campaign Baru</button>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap">
+      <button class="btn btn-secondary btn-sm active-filter" onclick="filterCampaigns('all',this)">Semua</button>
+      <button class="btn btn-secondary btn-sm" onclick="filterCampaigns('running',this)">Berjalan</button>
+      <button class="btn btn-secondary btn-sm" onclick="filterCampaigns('pending',this)">Pending</button>
+      <button class="btn btn-secondary btn-sm" onclick="filterCampaigns('completed',this)">Selesai</button>
+      <button class="btn btn-secondary btn-sm" onclick="filterCampaigns('paused',this)">Paused</button>
+    </div>
+    <div id="campaigns-list"><div style="color:var(--muted);padding:1rem 0;text-align:center">Memuat...</div></div>
+  </div>
+</div>
+
+<!-- PROXIES -->
+<div class="page" id="page-proxies">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.5rem">
+    <div>
+      <div class="page-title">Proxy Manager</div>
+      <div class="page-sub">Kelola 10 proxy residential kamu</div>
+    </div>
+    <div style="display:flex;gap:.5rem">
+      <button class="btn btn-secondary" onclick="testAllProxies()">⚡ Test Semua</button>
+      <button class="btn btn-primary" onclick="showModal('modal-add-proxy')">+ Tambah Proxy</button>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1.25rem">
+    <div class="card-title">Kualitas Traffic Residensial</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;text-align:center">
+      <div><div style="font-family:'Cabinet Grotesk',sans-serif;font-size:1.4rem;font-weight:900;color:var(--green)" id="q-residential">100%</div><div style="font-size:.72rem;color:var(--muted);margin-top:2px">Residential IP</div></div>
+      <div><div style="font-family:'Cabinet Grotesk',sans-serif;font-size:1.4rem;font-weight:900;color:var(--accent)" id="q-latency">—ms</div><div style="font-size:.72rem;color:var(--muted);margin-top:2px">Avg Latency</div></div>
+      <div><div style="font-family:'Cabinet Grotesk',sans-serif;font-size:1.4rem;font-weight:900;color:var(--green)" id="q-online">—</div><div style="font-size:.72rem;color:var(--muted);margin-top:2px">Online</div></div>
+      <div><div style="font-family:'Cabinet Grotesk',sans-serif;font-size:1.4rem;font-weight:900;color:var(--purple)">ID</div><div style="font-size:.72rem;color:var(--muted);margin-top:2px">Geolokasi</div></div>
+    </div>
+  </div>
+
+  <div class="proxy-grid" id="proxies-list"></div>
+</div>
+
+<!-- LOGS -->
+<div class="page" id="page-logs">
+  <div class="page-title">Visit Logs</div>
+  <div class="page-sub">Semua riwayat kunjungan yang terkirim</div>
+  <div class="card">
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Waktu</th><th>Campaign</th><th>Status</th><th>Duration</th><th>Pages</th><th>Proxy</th><th>User Agent</th></tr></thead>
+        <tbody id="logs-table"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Memuat...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="page" id="page-settings">
+  <div class="page-title">Settings</div>
+  <div class="page-sub">Konfigurasi panel</div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">⚙️ General</div>
+      <div class="form-group"><label class="form-label">Panel Password Baru</label><input type="password" class="form-input" placeholder="Kosongkan jika tidak ingin ganti"></div>
+      <div class="form-group"><label class="form-label">Max Concurrent Visits</label><div class="sel-wrap"><select class="form-select"><option value="2">2 (Aman untuk 2GB RAM)</option><option value="3" selected>3 (Recommended)</option><option value="5">5 (Butuh 4GB RAM)</option></select></div><div class="form-hint">Sesuaikan dengan RAM VPS kamu</div></div>
+      <button class="btn btn-primary btn-full">Simpan</button>
+    </div>
+    <div class="card">
+      <div class="card-title">🛡️ Traffic Quality</div>
+      <div style="display:flex;flex-direction:column;gap:.8rem">
+        <div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-weight:600;font-size:.85rem">Human-like Delay</div><div style="font-size:.72rem;color:var(--muted)">Jeda acak antar batch</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-weight:600;font-size:.85rem">Rotate User-Agent</div><div style="font-size:.72rem;color:var(--muted)">UA berbeda tiap visit</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-weight:600;font-size:.85rem">Randomize Referer</div><div style="font-size:.72rem;color:var(--muted)">Sumber traffic acak</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+        <div style="display:flex;align-items:center;justify-content:space-between"><div><div style="font-weight:600;font-size:.85rem">Auto-retry Failed</div><div style="font-size:.72rem;color:var(--muted)">Coba ulang visit gagal</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- MODALS -->
+<div id="modal-new-campaign" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:none;align-items:center;justify-content:center;padding:1rem">
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:1.75rem;width:100%;max-width:520px;max-height:90vh;overflow-y:auto">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+      <div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:1rem">Campaign Baru</div>
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('modal-new-campaign')">✕</button>
+    </div>
+    <div class="form-group"><label class="form-label">Nama Campaign</label><input class="form-input" id="nc-name" placeholder="cth: Toko Saya — Organic Boost"></div>
+    <div class="form-group"><label class="form-label">Target URL</label><input class="form-input" id="nc-url" placeholder="https://example.com/halaman-target"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Jumlah Visits</label><input type="number" class="form-input" id="nc-visits" value="1000" min="10"></div>
+      <div class="form-group"><label class="form-label">Geo Target</label><div class="sel-wrap"><select class="form-select" id="nc-geo"><option value="ID">🇮🇩 Indonesia</option><option value="US">🇺🇸 United States</option><option value="SG">🇸🇬 Singapore</option><option value="MY">🇲🇾 Malaysia</option><option value="mixed">🌍 Mixed</option></select></div></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Device</label><div class="sel-wrap"><select class="form-select" id="nc-device"><option value="mixed">Mixed (Desktop+Mobile)</option><option value="desktop">Desktop Only</option><option value="mobile">Mobile Only</option></select></div></div>
+      <div class="form-group"><label class="form-label">Traffic Source</label><div class="sel-wrap"><select class="form-select" id="nc-source"><option value="organic">Organic (Google)</option><option value="social">Social Media</option><option value="referral">Referral</option><option value="direct">Direct</option></select></div></div>
+    </div>
+    <div class="form-row-3">
+      <div class="form-group"><label class="form-label">Min Durasi (dtk)</label><input type="number" class="form-input" id="nc-mindur" value="30" min="5"></div>
+      <div class="form-group"><label class="form-label">Max Durasi (dtk)</label><input type="number" class="form-input" id="nc-maxdur" value="180" min="10"></div>
+      <div class="form-group"><label class="form-label">Bounce Rate %</label><input type="number" class="form-input" id="nc-bounce" value="30" min="0" max="100"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Pages per Session</label><input type="number" class="form-input" id="nc-pages" value="3" min="1" max="10"></div>
+    <div style="display:flex;gap:.5rem;margin-top:.5rem">
+      <button class="btn btn-secondary" style="flex:1" onclick="closeModal('modal-new-campaign')">Batal</button>
+      <button class="btn btn-primary" style="flex:2" id="nc-submit" onclick="createCampaign()">Buat Campaign →</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-add-proxy" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:center;justify-content:center;padding:1rem">
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:16px;padding:1.75rem;width:100%;max-width:460px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+      <div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:1rem">Tambah Proxy</div>
+      <button class="btn btn-secondary btn-sm" onclick="closeModal('modal-add-proxy')">✕</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Format: host:port:user:pass (satu per baris)</label>
+      <textarea class="form-textarea" id="proxy-raw" rows="6" placeholder="103.28.91.12:8080:user1:pass1&#10;114.122.58.34:8080:user2:pass2&#10;9.142.198.249:5916:Dmdigital5698:Dmdigital5698"></textarea>
+      <div class="form-hint">Bisa paste langsung dari provider. Satu proxy per baris.</div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">GEO</label><div class="sel-wrap"><select class="form-select" id="proxy-geo"><option value="ID">🇮🇩 Indonesia</option><option value="US">🇺🇸 US</option><option value="SG">🇸🇬 Singapore</option></select></div></div>
+      <div class="form-group"><label class="form-label">ISP (opsional)</label><input class="form-input" id="proxy-isp" placeholder="cth: Telkom IndiHome"></div>
+    </div>
+    <div style="display:flex;gap:.5rem">
+      <button class="btn btn-secondary" style="flex:1" onclick="closeModal('modal-add-proxy')">Batal</button>
+      <button class="btn btn-primary" style="flex:2" onclick="addProxies()">Tambah Proxy →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+const API = '';
+let TOKEN = localStorage.getItem('nx_token') || '';
+let currentFilter = 'all';
+
+// ─── AUTH ───
+function doLogin() {
+  const pass = document.getElementById('login-pass').value;
+  const btn = document.getElementById('login-btn');
+  btn.innerHTML = '<span class="spinner"></span> Masuk...';
+  btn.disabled = true;
+  fetch(`${API}/api/auth/login`, {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ password: pass })
+  }).then(r => r.json()).then(d => {
+    if (d.token) {
+      TOKEN = d.token;
+      localStorage.setItem('nx_token', TOKEN);
+      document.getElementById('login-screen').style.display = 'none';
+      init();
+    } else {
+      document.getElementById('login-err').style.display = 'block';
+      btn.innerHTML = 'Masuk →'; btn.disabled = false;
+    }
+  }).catch(() => {
+    // Dev mode — skip login if API not available
+    TOKEN = 'dev';
+    document.getElementById('login-screen').style.display = 'none';
+    toast('Mode Demo — API tidak terhubung', 'info');
+  });
+}
+
+function doLogout() {
+  localStorage.removeItem('nx_token');
+  location.reload();
+}
+
+// ─── API ───
+async function api(path, opts = {}) {
+  const res = await fetch(`${API}${path}`, {
+    ...opts,
+    headers: { 'Content-Type': 'application/json', 'x-auth-token': TOKEN, ...(opts.headers || {}) },
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+// ─── NAVIGATION ───
+function showPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
+  if (el) el.classList.add('active');
+  else document.querySelectorAll('.nav-pill').forEach(p => {
+    if (p.textContent.toLowerCase().includes(name.slice(0,4))) p.classList.add('active');
+  });
+  if (name === 'campaigns') loadCampaigns();
+  if (name === 'proxies') loadProxies();
+  if (name === 'logs') loadLogs();
+}
+
+// ─── TOAST ───
+function toast(msg, type = 'info') {
+  const el = document.createElement('div');
+  el.className = `toast-item toast-${type}`;
+  el.innerHTML = `${type==='success'?'✅':type==='error'?'❌':'ℹ️'} ${msg}`;
+  document.getElementById('toast').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ─── MODAL ───
+function showModal(id) { document.getElementById(id).style.display = 'flex'; }
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+// ─── DASHBOARD ───
+async function loadDashboard() {
+  try {
+    const d = await api('/api/stats');
+    const o = d.overview;
+    document.getElementById('s-campaigns').textContent = o.totalCampaigns;
+    document.getElementById('s-active').textContent = o.activeCampaigns;
+    document.getElementById('s-active-badge').textContent = o.activeCampaigns > 0 ? 'Live' : '—';
+    document.getElementById('s-visits').textContent = o.totalVisits.toLocaleString();
+    document.getElementById('s-rate').textContent = d.successRate + '%';
+    document.getElementById('s-rate-badge').textContent = d.successRate > 90 ? 'Excellent' : d.successRate > 70 ? 'Good' : 'Low';
+    document.getElementById('proxy-badge').innerHTML = `<div class="online-dot"></div>${o.activeProxies} Proxies`;
+    document.getElementById('active-count').textContent = o.activeCampaigns;
+    document.getElementById('dash-sub').textContent = `${o.totalCampaigns} campaigns · ${o.totalVisits.toLocaleString()} visits terkirim`;
+    renderChart(d.visitsByDay);
+    renderRecentLog(d.recentVisits);
+    renderActiveCampaigns();
+  } catch (e) {
+    document.getElementById('dash-sub').textContent = 'API tidak terhubung — mode demo';
+    renderDemoChart();
+  }
+}
+
+function renderChart(data) {
+  const el = document.getElementById('dash-chart');
+  const ll = document.getElementById('dash-chart-labels');
+  if (!data || !data.length) { el.innerHTML = '<div style="color:var(--muted);font-size:.8rem;margin:auto">Belum ada data</div>'; return; }
+  const max = Math.max(...data.map(d => d.count), 1);
+  el.innerHTML = data.map(d => `
+    <div class="chart-bar-col">
+      <div class="chart-bar" style="height:${Math.max((d.count/max)*90,3)}px;background:linear-gradient(180deg,var(--accent),rgba(56,189,248,.3))"></div>
+    </div>`).join('');
+  ll.innerHTML = data.map(d => `<span class="chart-lbl">${d.day.slice(5)}</span>`).join('');
+}
+
+function renderDemoChart() {
+  const vals = [120,240,180,380,290,450,520];
+  const days = ['Sen','Sel','Rab','Kam','Jum','Sab','Min'];
+  const max = Math.max(...vals);
+  document.getElementById('dash-chart').innerHTML = vals.map(v => `
+    <div class="chart-bar-col"><div class="chart-bar" style="height:${(v/max)*90}px;background:linear-gradient(180deg,var(--accent),rgba(56,189,248,.3))"></div></div>`).join('');
+  document.getElementById('dash-chart-labels').innerHTML = days.map(d => `<span class="chart-lbl">${d}</span>`).join('');
+}
+
+function renderRecentLog(visits) {
+  const el = document.getElementById('dash-log');
+  if (!visits || !visits.length) { el.innerHTML = '<div style="color:var(--muted);font-size:.8rem">Belum ada aktivitas</div>'; return; }
+  el.innerHTML = visits.slice(0,10).map(v => `
+    <div class="log-item">
+      <span class="log-time">${v.created_at ? v.created_at.slice(11,16) : '--:--'}</span>
+      <div class="log-dot" style="background:${v.status==='sent'?'var(--green)':'var(--red)'}"></div>
+      <span class="log-msg"><strong>${v.status==='sent'?'Visit OK':'Visit Gagal'}</strong> — ${v.campaign_name||'—'} · ${v.duration||0}s</span>
+    </div>`).join('');
+}
+
+async function renderActiveCampaigns() {
+  try {
+    const campaigns = await api('/api/campaigns');
+    const active = campaigns.filter(c => c.status === 'running');
+    const el = document.getElementById('active-campaigns-list');
+    if (!active.length) { el.innerHTML = '<div style="color:var(--muted);font-size:.82rem;padding:.5rem 0">Tidak ada campaign aktif.</div>'; return; }
+    el.innerHTML = active.map(c => renderCampaignCard(c)).join('');
+  } catch {}
+}
+
+// ─── CAMPAIGNS ───
+async function loadCampaigns() {
+  const el = document.getElementById('campaigns-list');
+  try {
+    const campaigns = await api('/api/campaigns');
+    const filtered = currentFilter === 'all' ? campaigns : campaigns.filter(c => c.status === currentFilter);
+    if (!filtered.length) { el.innerHTML = '<div style="color:var(--muted);padding:1.5rem;text-align:center">Tidak ada campaign.</div>'; return; }
+    el.innerHTML = filtered.map(c => renderCampaignCard(c, true)).join('');
+  } catch {
+    el.innerHTML = '<div style="color:var(--muted);padding:1.5rem;text-align:center">Gagal memuat — API tidak terhubung</div>';
+  }
+}
+
+function renderCampaignCard(c, showActions = false) {
+  const statusColor = { running:'var(--green)', pending:'var(--amber)', completed:'var(--accent)', paused:'var(--muted)', failed:'var(--red)', cancelled:'var(--red)' };
+  const statusTag = { running:'tag-green', pending:'tag-amber', completed:'tag-blue', paused:'tag-purple', failed:'tag-red', cancelled:'tag-red' };
+  const pct = c.visits_total > 0 ? Math.min(100, (c.visits_sent / c.visits_total) * 100) : 0;
+  return `
+  <div class="campaign-card">
+    <div class="cc-header">
+      <div>
+        <div class="cc-title">${c.name}</div>
+        <div class="cc-url">🔗 ${c.target_url}</div>
+      </div>
+      <span class="tag ${statusTag[c.status] || 'tag-blue'}">${c.status}</span>
+    </div>
+    <div class="cc-meta">
+      <div class="cc-meta-item">Visits: <span>${c.visits_sent.toLocaleString()}/${c.visits_total.toLocaleString()}</span></div>
+      <div class="cc-meta-item">Source: <span>${c.traffic_source}</span></div>
+      <div class="cc-meta-item">Device: <span>${c.device}</span></div>
+      <div class="cc-meta-item">Geo: <span>${c.geo}</span></div>
+      <div class="cc-meta-item">Durasi: <span>${c.min_duration}–${c.max_duration}s</span></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    ${showActions ? `
+    <div class="cc-footer">
+      ${c.status === 'pending' || c.status === 'paused' ? `<button class="btn btn-success btn-sm" onclick="setCampaignStatus('${c.id}','running')">▶ Start</button>` : ''}
+      ${c.status === 'running' ? `<button class="btn btn-secondary btn-sm" onclick="setCampaignStatus('${c.id}','paused')">⏸ Pause</button>` : ''}
+      ${c.status !== 'completed' && c.status !== 'cancelled' ? `<button class="btn btn-danger btn-sm" onclick="setCampaignStatus('${c.id}','cancelled')">■ Stop</button>` : ''}
+      <button class="btn btn-danger btn-sm" style="margin-left:auto" onclick="deleteCampaign('${c.id}')">🗑</button>
+      <span class="cc-progress-label">${pct.toFixed(1)}%</span>
+    </div>` : `<div class="cc-footer"><span class="cc-progress-label">${pct.toFixed(1)}% — ${c.visits_sent.toLocaleString()} visits</span></div>`}
+  </div>`;
+}
+
+async function createCampaign() {
+  const btn = document.getElementById('nc-submit');
+  btn.innerHTML = '<span class="spinner"></span> Membuat...';
+  btn.disabled = true;
+  try {
+    await api('/api/campaigns', {
+      method: 'POST',
+      body: {
+        name: document.getElementById('nc-name').value,
+        target_url: document.getElementById('nc-url').value,
+        visits_total: parseInt(document.getElementById('nc-visits').value),
+        geo: document.getElementById('nc-geo').value,
+        device: document.getElementById('nc-device').value,
+        traffic_source: document.getElementById('nc-source').value,
+        min_duration: parseInt(document.getElementById('nc-mindur').value),
+        max_duration: parseInt(document.getElementById('nc-maxdur').value),
+        bounce_rate: parseInt(document.getElementById('nc-bounce').value),
+        pages_per_session: parseInt(document.getElementById('nc-pages').value),
+      }
+    });
+    closeModal('modal-new-campaign');
+    toast('Campaign berhasil dibuat!', 'success');
+    loadCampaigns();
+  } catch (e) {
+    toast('Gagal: ' + e.message, 'error');
+  }
+  btn.innerHTML = 'Buat Campaign →'; btn.disabled = false;
+}
+
+async function setCampaignStatus(id, status) {
+  try {
+    await api(`/api/campaigns/${id}/status`, { method: 'PATCH', body: { status } });
+    toast(`Campaign ${status}`, 'success');
+    loadCampaigns(); loadDashboard();
+  } catch (e) { toast('Gagal: ' + e.message, 'error'); }
+}
+
+async function deleteCampaign(id) {
+  if (!confirm('Hapus campaign ini?')) return;
+  try {
+    await api(`/api/campaigns/${id}`, { method: 'DELETE' });
+    toast('Campaign dihapus', 'success');
+    loadCampaigns();
+  } catch (e) { toast('Gagal', 'error'); }
+}
+
+function filterCampaigns(filter, el) {
+  currentFilter = filter;
+  document.querySelectorAll('.active-filter').forEach(b => b.classList.remove('active-filter', 'btn-primary'));
+  el.classList.add('active-filter');
+  loadCampaigns();
+}
+
+// ─── PROXIES ───
+async function loadProxies() {
+  const el = document.getElementById('proxies-list');
+  try {
+    const proxies = await api('/api/proxies');
+    const online = proxies.filter(p => p.status === 'active').length;
+    const avgLatency = proxies.filter(p => p.latency).reduce((a, b) => a + b.latency, 0) / (proxies.filter(p => p.latency).length || 1);
+    document.getElementById('q-online').textContent = `${online}/${proxies.length}`;
+    document.getElementById('q-latency').textContent = avgLatency ? Math.round(avgLatency) + 'ms' : '—ms';
+    document.getElementById('proxy-badge').innerHTML = `<div class="online-dot"></div>${online}/${proxies.length} Proxies`;
+
+    if (!proxies.length) { el.innerHTML = '<div style="color:var(--muted);padding:1rem">Belum ada proxy. Tambah proxy dulu.</div>'; return; }
+    el.innerHTML = proxies.map(p => renderProxyCard(p)).join('');
+  } catch {
+    el.innerHTML = '<div style="color:var(--muted);padding:1rem">Gagal memuat — API tidak terhubung</div>';
+  }
+}
+
+function renderProxyCard(p) {
+  const pingColor = !p.latency ? 'var(--muted)' : p.latency < 80 ? 'var(--green)' : p.latency < 150 ? 'var(--amber)' : 'var(--red)';
+  const pingW = p.latency ? Math.max(5, 100 - Math.min(p.latency, 300) / 3) : 0;
+  return `
+  <div class="proxy-card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.65rem">
+      <span style="font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:.75rem;color:var(--muted2);background:var(--s3);padding:.15rem .5rem;border-radius:5px">Proxy #${p.id}</span>
+      <span style="display:flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:700;color:${p.status==='active'?'var(--green)':'var(--red)'}">
+        <span style="width:5px;height:5px;border-radius:50%;background:currentColor;display:inline-block"></span>
+        ${p.status === 'active' ? 'Online' : 'Offline'}
+      </span>
+    </div>
+    <div style="font-family:'Cabinet Grotesk',sans-serif;font-weight:700;font-size:.9rem;margin-bottom:.4rem">${p.host}:${p.port}</div>
+    <div style="display:flex;gap:.75rem;font-size:.72rem;color:var(--muted);margin-bottom:.5rem">
+      <span>GEO: <strong style="color:var(--muted2)">${p.geo}</strong></span>
+      ${p.isp ? `<span>ISP: <strong style="color:var(--muted2)">${p.isp}</strong></span>` : ''}
+    </div>
+    <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.65rem">
+      <div class="progress-bar" style="flex:1"><div class="progress-fill" style="width:${pingW}%;background:${pingColor}"></div></div>
+      <span style="font-size:.72rem;font-weight:700;color:${pingColor};white-space:nowrap">${p.latency ? p.latency+'ms' : '—'}</span>
+    </div>
+    <div style="display:flex;gap:.4rem">
+      <button class="btn btn-success btn-sm" onclick="testProxy(${p.id},this)">Test</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteProxy(${p.id})">Hapus</button>
+    </div>
+  </div>`;
+}
+
+async function addProxies() {
+  const raw = document.getElementById('proxy-raw').value.trim();
+  const geo = document.getElementById('proxy-geo').value;
+  const isp = document.getElementById('proxy-isp').value;
+  if (!raw) { toast('Isi proxy dulu', 'error'); return; }
+  const lines = raw.split('\n').filter(l => l.trim());
+  try {
+    await api('/api/proxies/bulk', { method: 'POST', body: { proxies: lines, geo, isp } });
+    closeModal('modal-add-proxy');
+    toast(`${lines.length} proxy ditambahkan!`, 'success');
+    document.getElementById('proxy-raw').value = '';
+    loadProxies();
+  } catch (e) { toast('Gagal: ' + e.message, 'error'); }
+}
+
+async function testProxy(id, btn) {
+  btn.textContent = '⏳';
+  btn.disabled = true;
+  try {
+    const d = await api(`/api/proxies/${id}/test`, { method: 'POST' });
+    btn.textContent = d.success ? `✓ ${d.latency}ms` : '✗ Fail';
+    btn.className = `btn btn-sm ${d.success ? 'btn-success' : 'btn-danger'}`;
+    toast(d.success ? `Proxy #${id} OK — ${d.ip} — ${d.latency}ms` : `Proxy #${id} gagal: ${d.error}`, d.success ? 'success' : 'error');
+    loadProxies();
+  } catch (e) { btn.textContent = '✗'; toast('Test gagal', 'error'); }
+  setTimeout(() => { btn.textContent = 'Test'; btn.disabled = false; btn.className = 'btn btn-success btn-sm'; }, 3000);
+}
+
+async function testAllProxies() {
+  toast('Testing semua proxy...', 'info');
+  try {
+    const proxies = await api('/api/proxies');
+    for (const p of proxies) {
+      await api(`/api/proxies/${p.id}/test`, { method: 'POST' });
+      await new Promise(r => setTimeout(r, 500));
+    }
+    toast('Semua proxy selesai dites', 'success');
+    loadProxies();
+  } catch (e) { toast('Gagal test proxy', 'error'); }
+}
+
+async function deleteProxy(id) {
+  if (!confirm('Hapus proxy ini?')) return;
+  try {
+    await api(`/api/proxies/${id}`, { method: 'DELETE' });
+    toast('Proxy dihapus', 'success');
+    loadProxies();
+  } catch { toast('Gagal', 'error'); }
+}
+
+// ─── LOGS ───
+async function loadLogs() {
+  const tbody = document.getElementById('logs-table');
+  try {
+    const d = await api('/api/stats');
+    const visits = d.recentVisits;
+    if (!visits.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">Belum ada visit</td></tr>'; return; }
+    tbody.innerHTML = visits.map(v => `
+      <tr>
+        <td style="color:var(--muted);font-size:.72rem">${v.created_at ? v.created_at.slice(0,16).replace('T',' ') : '—'}</td>
+        <td style="font-weight:600">${v.campaign_name || '—'}</td>
+        <td><span class="tag ${v.status==='sent'?'tag-green':'tag-red'}">${v.status}</span></td>
+        <td>${v.duration ? v.duration+'s' : '—'}</td>
+        <td>${v.pages || 1}</td>
+        <td style="color:var(--muted);font-size:.72rem">${v.proxy_host || '—'} <span class="tag tag-blue" style="font-size:.6rem">${v.geo||'ID'}</span></td>
+        <td style="color:var(--muted);font-size:.65rem;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v.user_agent ? v.user_agent.slice(0,60)+'...' : '—'}</td>
+      </tr>`).join('');
+  } catch {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:2rem">API tidak terhubung</td></tr>';
+  }
+}
+
+// ─── INIT ───
+function init() {
+  loadDashboard();
+  // Auto-refresh every 15 seconds
+  setInterval(() => {
+    const activePage = document.querySelector('.page.active');
+    if (activePage?.id === 'page-dashboard') loadDashboard();
+    if (activePage?.id === 'page-campaigns') loadCampaigns();
+  }, 15000);
+}
+
+// Check existing token on load
+window.onload = () => {
+  if (TOKEN) {
+    document.getElementById('login-screen').style.display = 'none';
+    init();
+  }
+};
+</script>
+</body>
+</html>
