@@ -1,6 +1,4 @@
-# NexusTraffic — Personal Traffic Generator
-
-Panel traffic generator pribadi dengan 10 proxy residential.
+# NexusTraffic
 
 ## Stack
 - **Backend**: Node.js + Express
@@ -83,42 +81,6 @@ sudo nginx -t && sudo systemctl restart nginx
 ```bash
 sudo apt install certbot python3-certbot-nginx -y
 sudo certbot --nginx -d yourdomain.com
-```
-
----
-
-## Cara Pakai
-
-1. Buka panel di `http://IP_VPS:3000`
-2. Login dengan password dari `.env`
-3. **Proxies** → Tambah 10 proxy kamu (format: `host:port:user:pass`)
-4. **Campaigns** → Buat campaign baru, isi URL target & pengaturan
-5. Klik **Start** → engine berjalan otomatis
-
----
-
-## Pengaturan Campaign
-
-| Field | Keterangan |
-|---|---|
-| Target URL | Website yang mau dikirim traffic |
-| Visits Total | Berapa kunjungan yang dikirim |
-| Geo | Negara asal traffic |
-| Device | Desktop / Mobile / Mixed |
-| Traffic Source | Organic (Google), Social, Referral, Direct |
-| Min/Max Durasi | Lama kunjungan per halaman (detik) |
-| Bounce Rate | % pengunjung yang langsung keluar |
-| Pages/Session | Jumlah halaman yang dikunjungi per sesi |
-
----
-
-## Commands Berguna
-
-```bash
-pm2 status                    # Cek status
-pm2 logs nexustraffic         # Lihat log real-time
-pm2 restart nexustraffic      # Restart
-pm2 stop nexustraffic         # Stop
 ```
 
 ---
