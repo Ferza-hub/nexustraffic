@@ -345,6 +345,16 @@ tr:hover td{background:rgba(56,189,248,.02)}
       <div class="form-group"><label class="form-label">Bounce Rate %</label><input type="number" class="form-input" id="nc-bounce" value="30" min="0" max="100"></div>
     </div>
     <div class="form-group"><label class="form-label">Pages per Session</label><input type="number" class="form-input" id="nc-pages" value="3" min="1" max="10"></div>
+    <div class="form-row">
+      <div class="form-group">
+          <label class="form-label">GA4 Measurement ID (opsional)</label>
+              <input class="form-input" id="nc-ga4-id" placeholder="G-XXXXXXXXXX">
+                </div>
+                  <div class="form-group">
+                      <label class="form-label">GA4 API Secret (opsional)</label>
+                          <input class="form-input" id="nc-ga4-secret" placeholder="api_secret...">
+                            </div>
+                            </div>
     <div style="display:flex;gap:.5rem;margin-top:.5rem">
       <button class="btn btn-secondary" style="flex:1" onclick="closeModal('modal-new-campaign')">Batal</button>
       <button class="btn btn-primary" style="flex:2" id="nc-submit" onclick="createCampaign()">Buat Campaign →</button>
@@ -580,6 +590,8 @@ async function createCampaign() {
         max_duration: parseInt(document.getElementById('nc-maxdur').value),
         bounce_rate: parseInt(document.getElementById('nc-bounce').value),
         pages_per_session: parseInt(document.getElementById('nc-pages').value),
+        ga4_measurement_id: document.getElementById('nc-ga4-id').value || null,
+        ga4_api_secret: document.getElementById('nc-ga4-secret').value || null,
       }
     });
     closeModal('modal-new-campaign');
