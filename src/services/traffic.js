@@ -65,7 +65,7 @@ function getDevice(devicePref) {
   if (devicePref === 'desktop') return 'desktop';
   if (devicePref === 'mobile') return 'mobile';
   if (devicePref === 'tablet') return 'tablet';
-  // mixed
+  
   const r = Math.random();
   if (r < 0.55) return 'desktop';
   if (r < 0.85) return 'mobile';
@@ -147,8 +147,7 @@ async function sendVisit(campaign, proxy) {
 
 async function runCampaign(campaignId) {
   const campaign = db.prepare('SELECT * FROM campaigns WHERE id = ?').get(campaignId);
-  if (!campaign) return;
-  if (campaign.status !== 'running') return;
+  if (!campaign || campaign.status !== 'running') return;
 
   const proxies = db.prepare("SELECT * FROM proxies WHERE status = 'active'").all();
   if (!proxies.length) {
@@ -160,12 +159,10 @@ async function runCampaign(campaignId) {
   const remaining = campaign.visits_total - campaign.visits_sent;
   console.log(`🚀 Campaign ${campaignId} — sending ${remaining} visits`);
 
-  // Concurrency limit to protect RAM (max 5 at once)
   const MAX_CONCURRENT = parseInt(process.env.MAX_CONCURRENT || '3');
 
   let i = 0;
   while (i < remaining) {
-    // Check campaign still running
     const current = db.prepare('SELECT status, visits_sent FROM campaigns WHERE id = ?').get(campaignId);
     if (current.status !== 'running') break;
 
@@ -188,7 +185,7 @@ async function runCampaign(campaignId) {
             INSERT INTO visits (campaign_id, proxy_id, status, duration, pages, user_agent)
             VALUES (?, ?, 'sent', ?, ?, ?)
           `).run(campaignId, proxy.id, result.duration, result.pages, result.ua);
-          console.log(`  ✓ Visit sent — ${result.device} | ${result.source} | ${result.duration}s | proxy ${proxy.id}`);
+          console.log(`  ✓ Visit sent — ${result.device} | ${result.source} | ${result.duration}s`);
         } else {
           db.prepare(`
             INSERT INTO visits (campaign_id, proxy_id, status)
@@ -200,16 +197,13 @@ async function runCampaign(campaignId) {
     }
 
     i += batchSize;
-
-    // Human-like delay between batches (2-8 seconds)
     await sleep(randomInt(2000, 8000));
   }
 
-  // Mark complete
   const final = db.prepare('SELECT visits_sent, visits_total FROM campaigns WHERE id = ?').get(campaignId);
   const newStatus = final.visits_sent >= final.visits_total ? 'completed' : 'failed';
   db.prepare("UPDATE campaigns SET status = ?, completed_at = CURRENT_TIMESTAMP WHERE id = ?").run(newStatus, campaignId);
-  console.log(`✅ Campaign ${campaignId} ${newStatus} — ${final.visits_sent}/${final.visits_total} visits`);
+  console.log(`✅ Campaign ${campaignId} ${newStatus}`);
 }
 
 module.exports = { runCampaign };
